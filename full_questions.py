@@ -55,5 +55,6 @@ questions = [
 print(f"✅ Loaded {len(questions)} questions:")
 print(f"   • Grammar: 25 questions")
 print(f"   • Vocabulary: 21 questions")
-
+]
 print(f"   • Total points: {sum(q['points'] for q in questions)}")
+
