@@ -394,31 +394,59 @@ async def ask_question(user_id):
     question = questions[q_index]
     
     if question['type'] == 'choice':
-        builder = InlineKeyboardBuilder()
-        
-        for i, option in enumerate(question['options']):
-            if option and str(option).strip() and str(option).strip() != 'nan':
-                button_text = truncate_button_text(str(option).strip())
-                
+        # ОСОБАЯ ОБРАБОТКА ДЛЯ ВОПРОСОВ 45 И 46 (индексы 44 и 45)
+        if q_index in [44, 45]:  # Вопросы 45 и 46
+            builder = InlineKeyboardBuilder()
+            
+            # Только буквы A, B, C на кнопках
+            for i in range(len(question['options'])):
                 builder.add(InlineKeyboardButton(
-                    text=button_text,
+                    text=f"{question['options'][i]}",  # A, B, C
                     callback_data=f"ans_{q_index}_{i}"
                 ))
-        
-        builder.add(InlineKeyboardButton(
-            text="⏭ Skip (пропустить)",
-            callback_data=f"skip_{q_index}"
-        ))
-        
-        builder.adjust(1)
-        
-        await bot.send_message(
-            user_id,
-            f"<b>Question {q_index+1}/{len(questions)}</b> ({question['points']} point{'s' if question['points'] > 1 else ''})\n\n"
-            f"{question['text']}",
-            reply_markup=builder.as_markup(),
-            parse_mode="HTML"
-        )
+            
+            builder.add(InlineKeyboardButton(
+                text="⏭ Skip (пропустить)",
+                callback_data=f"skip_{q_index}"
+            ))
+            
+            builder.adjust(3, 1)  # 3 кнопки в ряд, потом skip
+            
+            await bot.send_message(
+                user_id,
+                f"<b>Question {q_index+1}/{len(questions)}</b> ({question['points']} point{'s' if question['points'] > 1 else ''})\n\n"
+                f"{question['text']}",
+                parse_mode="HTML",
+                reply_markup=builder.as_markup()
+            )
+            
+        else:
+            # Обычная обработка для остальных вопросов
+            builder = InlineKeyboardBuilder()
+            
+            for i, option in enumerate(question['options']):
+                if option and str(option).strip() and str(option).strip() != 'nan':
+                    button_text = truncate_button_text(str(option).strip())
+                    
+                    builder.add(InlineKeyboardButton(
+                        text=button_text,
+                        callback_data=f"ans_{q_index}_{i}"
+                    ))
+            
+            builder.add(InlineKeyboardButton(
+                text="⏭ Skip (пропустить)",
+                callback_data=f"skip_{q_index}"
+            ))
+            
+            builder.adjust(1)
+            
+            await bot.send_message(
+                user_id,
+                f"<b>Question {q_index+1}/{len(questions)}</b> ({question['points']} point{'s' if question['points'] > 1 else ''})\n\n"
+                f"{question['text']}",
+                reply_markup=builder.as_markup(),
+                parse_mode="HTML"
+            )
     
     else:
         waiting_for_open_answer[user_id] = q_index
@@ -831,3 +859,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
