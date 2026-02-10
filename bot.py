@@ -15,6 +15,10 @@ async def start(message: types.Message):
     await message.answer("✅ Бот работает на Railway!")
 
 async def main():
+    # УДАЛЯЕМ вебхук перед запуском
+    await bot.delete_webhook(drop_pending_updates=True)
+    print("✅ Вебхук удалён")
+    
     print("🤖 Бот запущен")
     await dp.start_polling(bot)
 
