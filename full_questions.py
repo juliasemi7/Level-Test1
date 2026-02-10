@@ -51,10 +51,9 @@ questions = [
     {'id': 44, 'type': 'choice', 'text': 'My dad ______ me to go ahead with my idea.', 'options': ['said', 'suggested', 'encouraged', 'claimed'], 'correct': 'C', 'points': 2},
 {'id': 45, 'type': 'choice', 'text': '"NOTICE: On Friday hundreds of our most popular products will be reduced for one day only! Don\'t miss it!"\n\nChoose the correct meaning:\nA) Everything in this shop will be cheaper on Friday.\nB) There will be a discount on many products on Friday.\nC) The shop\'s most popular products will cost less after Friday.', 'options': ['A', 'B', 'C'], 'correct': 'B', 'points': 2},
 {'id': 46, 'type': 'choice', 'text': '"WAIT FOR LIFT DOORS TO CLOSE BEFORE PRESSING THE BUTTON"\n\nWhat should you do?\nA) Press the button while the doors are closing.\nB) Press the button to close the doors.\nC) Press the button after the doors close.', 'options': ['A', 'B', 'C'], 'correct': 'C', 'points': 2},
+]  
 
 print(f"✅ Loaded {len(questions)} questions:")
 print(f"   • Grammar: 25 questions")
 print(f"   • Vocabulary: 21 questions")
-]
 print(f"   • Total points: {sum(q['points'] for q in questions)}")
-
