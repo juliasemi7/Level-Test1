@@ -1,4 +1,4 @@
-# bot.py - ПОЛНЫЙ БОТ ДЛЯ RAILWAY (ADVANCED VERSION)
+# bot.py - ПОЛНЫЙ БОТ ДЛЯ RAILWAY (BEGINNER VERSION)
 import asyncio
 import os
 import json
@@ -60,17 +60,20 @@ async def cmd_start(message: Message):
     if user_id in waiting_for_open_answer:
         del waiting_for_open_answer[user_id]
     
-    start_text = """<b>Let's start!</b>
+    start_text = """🇬🇧 <b>ENGLISH LEVEL TEST</b>
 
-1. Choose the best option or complete a line with a word or a phrase. Text answers should be entered without additional spaces and extra characters.
+📊 <b>Questions (вопросов):</b> 46
+⏰ <b>Time (время):</b> 30 minutes
+🎯 <b>Maximum score:</b> 67 баллов
 
-2. The test is taken with no dictionaries, books, friends and without any Internet resources. Please do not switch to other tabs during the test. The system monitors any tab switches, loss of visual contact (distraction by other devices), and notifies the instructor of their frequency after completing the test.
+<b>Key pre-test information (Как проходит тест)</b>
 
-3. Those questions which seem too difficult should be skipped or marked as "Skip the question".
+1. Choose the best option or complete the gap.
+2. The test is taken without dictionaries or internet.
+3. Skip difficult questions.
+4. You have 30 minutes.
 
-4. You have <b>30 minutes</b> to complete the test. Please, pay attention to the timer.
-
-🔍 <b>Let's buckle up and begin!</b>"""
+🔍 <b>Let's begin!</b>"""
     
     await message.answer(start_text, parse_mode="HTML")
     
@@ -86,16 +89,15 @@ async def cmd_start(message: Message):
 # ========== КОМАНДА HELP ==========
 @dp.message(Command("help"))
 async def cmd_help(message: Message):
-    """Показывает список доступных команд"""
     help_text = (
         "📋 <b>COMMANDS / КОМАНДЫ</b>\n\n"
         "🔹 /start - начать регистрацию и тест\n"
         "🔹 /time - проверить оставшееся время\n"
         "🔹 /cancel - отменить текущий тест\n"
         "🔹 /help - показать это сообщение\n\n"
-        "⏱️ <b>Время на тест:</b> 30 минут\n"
-        "📊 <b>Количество вопросов:</b> 53\n"
-        "🏆 <b>Уровни:</b> Pre-Intermediate → Proficiency"
+        "⏱️ <b>Время:</b> 30 минут\n"
+        "📊 <b>Вопросов:</b> 46\n"
+        "🏆 <b>Максимум:</b> 67 баллов"
     )
     await message.answer(help_text, parse_mode="HTML")
     print(f"ℹ️ Help показан пользователю {message.from_user.id}")
@@ -164,7 +166,7 @@ async def cmd_results(message: Message):
                 for i, test in enumerate(data, 1):
                     name = test.get('name', f'Student {i}')
                     score = test.get('score', 0)
-                    max_score = 81
+                    max_score = 67
                     percentage = test.get('percentage', 0)
                     level = test.get('level', 'Unknown')
                     
@@ -177,7 +179,7 @@ async def cmd_results(message: Message):
                 for i, test in enumerate(data):
                     name = test.get('name', f'Student {i+1}')
                     score = test.get('score', 0)
-                    max_score = 81
+                    max_score = 67
                     
                     button_text = f"{i+1}. {name} - {score}/{max_score}"
                     
@@ -205,33 +207,7 @@ async def cmd_results(message: Message):
             else:
                 await message.answer("📭 <b>Нет данных о тестах.</b>", parse_mode="HTML")
         else:
-            if os.path.exists('results.csv'):
-                with open('results.csv', 'r', encoding='utf-8') as f:
-                    reader = csv.reader(f)
-                    rows = list(reader)
-                
-                if len(rows) > 1:
-                    total_tests = len(rows) - 1
-                    stats_text = f"👩‍🏫 <b>TEACHER DASHBOARD</b>\n\n"
-                    stats_text += f"📊 <b>Всего тестов:</b> {total_tests}\n\n"
-                    
-                    for i, row in enumerate(rows[1:], 1):
-                        if len(row) >= 11:
-                            name = row[3] if row[3] else f"Student {i}"
-                            score = row[7] if len(row) > 7 else "0"
-                            max_score = "81"
-                            percentage = row[9] if len(row) > 9 else "0%"
-                            
-                            stats_text += f"{i}. <b>{name}</b> - {score}/{max_score} ({percentage})\n"
-                    
-                    await message.answer(stats_text, parse_mode="HTML")
-                    
-                    csv_file = FSInputFile('results.csv')
-                    await message.answer_document(csv_file, caption="📊 CSV файл со всеми результатами")
-                else:
-                    await message.answer("📭 <b>Нет результатов тестов.</b>", parse_mode="HTML")
-            else:
-                await message.answer("📭 <b>Нет результатов тестов.</b>", parse_mode="HTML")
+            await message.answer("📭 <b>Файл с результатами не найден.</b>", parse_mode="HTML")
             
     except Exception as e:
         await message.answer(f"❌ Ошибка: {str(e)}")
@@ -359,7 +335,7 @@ async def send_quick_report_to_teacher(session, total_score, max_score, percenta
 • Процент: {percentage:.1f}%
 • Уровень: {level}
 • Неверных ответов: {wrong_answers_count}
-• Вопросов отвечено: {len(session.get('all_answers', []))}/53
+• Вопросов отвечено: {len(session.get('all_answers', []))}/46
 """
         await bot.send_message(TEACHER_ID, report_msg, parse_mode="HTML")
         
@@ -513,7 +489,7 @@ async def ask_question(user_id):
     question = questions[q_index]
     
     if question['type'] == 'choice':
-        if q_index == 52:  # Вопрос 53
+        if q_index in [44, 45]:  # Вопросы 45 и 46 с буквами
             builder = InlineKeyboardBuilder()
             
             for i in range(len(question['options'])):
@@ -527,7 +503,7 @@ async def ask_question(user_id):
                 callback_data=f"skip_{q_index}"
             ))
             
-            builder.adjust(3, 1)
+            builder.adjust(4, 1)
             
             await bot.send_message(
                 user_id,
@@ -536,7 +512,6 @@ async def ask_question(user_id):
                 parse_mode="HTML",
                 reply_markup=builder.as_markup()
             )
-        
         else:
             builder = InlineKeyboardBuilder()
             
@@ -563,7 +538,6 @@ async def ask_question(user_id):
                 reply_markup=builder.as_markup(),
                 parse_mode="HTML"
             )
-    
     else:
         waiting_for_open_answer[user_id] = q_index
         
@@ -742,7 +716,7 @@ async def view_student_details(callback: CallbackQuery):
         if 0 <= test_index < len(data):
             test_data = data[test_index]
             student_name = test_data.get('name', f'Student {test_index+1}')
-            max_score = 81
+            max_score = 67
             
             info_msg = f"""👨‍🎓 <b>ПОЛНЫЙ ОТЧЕТ - {student_name}</b>
 
@@ -756,7 +730,7 @@ async def view_student_details(callback: CallbackQuery):
 • Баллы: {test_data.get('score', 0)}/{max_score}
 • Процент: {test_data.get('percentage', 0):.1f}%
 • Уровень: {test_data.get('level', 'Unknown')}
-• Вопросов отвечено: {len(test_data.get('all_answers', []))}/53
+• Вопросов отвечено: {len(test_data.get('all_answers', []))}/46
 • Неверных ответов: {len(test_data.get('wrong_answers', []))}
 • Завершено: {'⏰ Время вышло' if test_data.get('time_up') else '✅ Да'}
 """
@@ -843,20 +817,20 @@ async def finish_test(user_id, time_up=False):
             pass
     
     total_score = session["score"]
-    max_score = 81
+    max_score = 67
     percentage = (total_score / max_score * 100) if max_score > 0 else 0
     
-    # Шкала уровней согласно таблице
-    if total_score > 80:
-        level = "Proficiency"
-    elif total_score >= 65:
-        level = "Advanced"
-    elif total_score >= 45:
+    # Шкала уровней для начинающих
+    if total_score >= 57:
         level = "Upper-Intermediate"
-    elif total_score >= 25:
+    elif total_score >= 40:
         level = "Intermediate"
-    else:
+    elif total_score >= 23:
         level = "Pre-Intermediate"
+    elif total_score >= 7:
+        level = "Elementary"
+    else:
+        level = "Starter"
     
     session["level"] = level
     session["max_score"] = max_score
@@ -980,13 +954,13 @@ async def main():
     print("✅ Вебхук удалён")
     
     print("=" * 60)
-    print("🤖 ENGLISH TEST BOT - ADVANCED VERSION")
+    print("🤖 ENGLISH TEST BOT - BEGINNER VERSION")
     print("=" * 60)
     print(f"✅ Questions: {len(questions)}")
-    print(f"✅ Max score: 81")
+    print(f"✅ Max score: 67")
     print(f"✅ Teacher ID: {TEACHER_ID}")
     print("=" * 60)
-    print("🏆 Levels: Pre-Int → Int → Upper Int → Advanced → Proficiency")
+    print("🏆 Levels: Starter → Elementary → Pre-Int → Int → Upper Int")
     print("🎯 Бот работает 24/7 на Railway!")
     print("=" * 60)
     
