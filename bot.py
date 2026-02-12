@@ -1,4 +1,4 @@
-# bot.py - ПОЛНЫЙ БОТ ДЛЯ RAILWAY (BEGINNER VERSION)
+# bot.py - ПОЛНЫЙ БОТ ДЛЯ RAILWAY (НАЧИНАЮЩИЕ)
 import asyncio
 import os
 import json
@@ -29,7 +29,6 @@ except ImportError:
     print("❌ Ошибка: файл full_questions.py не найден")
     questions = []
 
-# ========== ИНИЦИАЛИЗАЦИЯ БОТА ==========
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
@@ -64,16 +63,25 @@ async def cmd_start(message: Message):
 
 📊 <b>Questions (вопросов):</b> 46
 ⏰ <b>Time (время):</b> 30 minutes
-🎯 <b>Maximum score:</b> 67 баллов
 
 <b>Key pre-test information (Как проходит тест)</b>
 
-1. Choose the best option or complete the gap.
-2. The test is taken without dictionaries or internet.
-3. Skip difficult questions.
-4. You have 30 minutes.
+🇬🇧 <b>English version:</b>
+1. You have <b>30 minutes</b> to complete the test.
+2. The test comprises two sections, totaling <b>46 questions</b>.
+3. Select the best answer or fill in the missing element.
+4. Complete the test on your own - no dictionaries, books, friends, or internet resources allowed.
+5. Please skip questions you are unsure about.
+6. At the end, you'll see your score and incorrect answers.
 
-🔍 <b>Let's begin!</b>"""
+🇷🇺 <b>Russian version:</b>
+1. У вас есть <b>30 минут</b>, чтобы ответить на вопросы.
+2. Этот тест состоит из двух разделов и <b>46 вопросов</b>.
+3. Выберите подходящий ответ или заполните пропуск.
+4. Выполняйте тест самостоятельно, без словарей, книг, друзей или интернета.
+5. Пропускайте вопросы, вызывающие сомнения.
+6. В конце вы увидите ваш результат и вопросы с ошибками.
+"""
     
     await message.answer(start_text, parse_mode="HTML")
     
@@ -95,9 +103,8 @@ async def cmd_help(message: Message):
         "🔹 /time - проверить оставшееся время\n"
         "🔹 /cancel - отменить текущий тест\n"
         "🔹 /help - показать это сообщение\n\n"
-        "⏱️ <b>Время:</b> 30 минут\n"
-        "📊 <b>Вопросов:</b> 46\n"
-        "🏆 <b>Максимум:</b> 67 баллов"
+        "⏱️ <b>Время на тест:</b> 30 минут\n"
+        "📊 <b>Количество вопросов:</b> 46"
     )
     await message.answer(help_text, parse_mode="HTML")
     print(f"ℹ️ Help показан пользователю {message.from_user.id}")
@@ -207,7 +214,33 @@ async def cmd_results(message: Message):
             else:
                 await message.answer("📭 <b>Нет данных о тестах.</b>", parse_mode="HTML")
         else:
-            await message.answer("📭 <b>Файл с результатами не найден.</b>", parse_mode="HTML")
+            if os.path.exists('results.csv'):
+                with open('results.csv', 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    rows = list(reader)
+                
+                if len(rows) > 1:
+                    total_tests = len(rows) - 1
+                    stats_text = f"👩‍🏫 <b>TEACHER DASHBOARD</b>\n\n"
+                    stats_text += f"📊 <b>Всего тестов:</b> {total_tests}\n\n"
+                    
+                    for i, row in enumerate(rows[1:], 1):
+                        if len(row) >= 11:
+                            name = row[3] if row[3] else f"Student {i}"
+                            score = row[7] if len(row) > 7 else "0"
+                            max_score = "67"
+                            percentage = row[9] if len(row) > 9 else "0%"
+                            
+                            stats_text += f"{i}. <b>{name}</b> - {score}/{max_score} ({percentage})\n"
+                    
+                    await message.answer(stats_text, parse_mode="HTML")
+                    
+                    csv_file = FSInputFile('results.csv')
+                    await message.answer_document(csv_file, caption="📊 CSV файл со всеми результатами")
+                else:
+                    await message.answer("📭 <b>Нет результатов тестов.</b>", parse_mode="HTML")
+            else:
+                await message.answer("📭 <b>Нет результатов тестов.</b>", parse_mode="HTML")
             
     except Exception as e:
         await message.answer(f"❌ Ошибка: {str(e)}")
@@ -489,7 +522,7 @@ async def ask_question(user_id):
     question = questions[q_index]
     
     if question['type'] == 'choice':
-        if q_index in [44, 45]:  # Вопросы 45 и 46 с буквами
+        if q_index in [44, 45]:
             builder = InlineKeyboardBuilder()
             
             for i in range(len(question['options'])):
@@ -820,7 +853,6 @@ async def finish_test(user_id, time_up=False):
     max_score = 67
     percentage = (total_score / max_score * 100) if max_score > 0 else 0
     
-    # Шкала уровней для начинающих
     if total_score >= 57:
         level = "Upper-Intermediate"
     elif total_score >= 40:
@@ -959,9 +991,6 @@ async def main():
     print(f"✅ Questions: {len(questions)}")
     print(f"✅ Max score: 67")
     print(f"✅ Teacher ID: {TEACHER_ID}")
-    print("=" * 60)
-    print("🏆 Levels: Starter → Elementary → Pre-Int → Int → Upper Int")
-    print("🎯 Бот работает 24/7 на Railway!")
     print("=" * 60)
     
     try:
